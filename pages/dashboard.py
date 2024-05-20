@@ -33,8 +33,8 @@ df_media_movel['mediaMovel'] = df_media_movel.sort_values(by="Data")['Preco_USD'
 ### SIDEBAR
 with st.sidebar:
     st.page_link("app.py", label="Análise", icon='🔍')
-    st.page_link("pages\dashboard.py", label="Dashboard", icon='📊')
-    st.page_link("pages\modelo.py", label="Previsão de preço", icon='🔮')
+    st.page_link(r"pages\dashboard.py", label="Dashboard", icon='📊')
+    st.page_link(r"pages\modelo.py", label="Previsão de preço", icon='🔮')
     st.divider()
     ano = st.select_slider("Selecione o ano:", options=lst)
     df_petr_filtro = df_petr.query("Ano == @ano")
