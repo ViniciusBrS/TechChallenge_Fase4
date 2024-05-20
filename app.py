@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 #Capturar dados do petróleo Brent - Ipea
 def get_ipea(code, cols=None):
@@ -54,8 +55,7 @@ with tab1:
     fig, ax = plt.subplots()
     fig.set_size_inches(9, 5, forward=True)
     ax.plot(df_pand_19_20['Data'], df_pand_19_20['Preco_USD'])
-    ax.set(xlabel='Data', ylabel='Preço (USD)',
-        title='Preço do Petróleo Brent - Jan/19 à Dez/20')
+    ax.set(xlabel='Data', ylabel='Preço (USD)', title='Preço do Petróleo Brent - Jan/19 à Dez/20')
     ax.grid(axis='y')
     st.pyplot(fig)
 
@@ -76,7 +76,14 @@ with tab2:
 
 
 ### SIDEBAR
+# with st.sidebar:
+#     st.page_link("app.py", label="Análise", icon='🔍')
+#     st.page_link(r"pages\dashboard.py", label="Dashboard", icon='📊')
+#     st.page_link(r"pages\modelo.py", label="Previsão de preço", icon='🔮')
+base_dir = os.getcwd()
+path_dash = os.path.join(base_dir, "pages", "dashboard.py")
+path_modelo = os.path.join(base_dir, "pages", "modelo.py")
 with st.sidebar:
     st.page_link("app.py", label="Análise", icon='🔍')
-    st.page_link(r"pages\dashboard.py", label="Dashboard", icon='📊')
-    st.page_link(r"pages\modelo.py", label="Previsão de preço", icon='🔮')
+    st.page_link(path_dash, label="Dashboard", icon='📊')
+    st.page_link(path_modelo, label="Previsão de preço", icon='🔮')

@@ -9,15 +9,19 @@ from prophet import Prophet
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error
 import streamlit as st
 import warnings
+import os
 
 # Ignorar os FutureWarnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 ### SIDEBAR
+base_dir = os.getcwd()
+path_dash = os.path.join(base_dir, "pages", "dashboard.py")
+path_modelo = os.path.join(base_dir, "pages", "modelo.py")
 with st.sidebar:
     st.page_link("app.py", label="Análise", icon='🔍')
-    st.page_link(r"pages\dashboard.py", label="Dashboard", icon='📊')
-    st.page_link(r"pages\modelo.py", label="Previsão de preço", icon='🔮')
+    st.page_link(path_dash, label="Dashboard", icon='📊')
+    st.page_link(path_modelo, label="Previsão de preço", icon='🔮')
 
 # Ignorar os FutureWarnings
 
