@@ -93,16 +93,20 @@ def validar_data(data):
 # Entrada do usuário para a data
 data_input = st.text_input("Insira a data para previsão (formato DD-MM-AAAA):")
 
+st.divider()
+
 if data_input:
     if validar_data(data_input):
         model, previsao = prevendo(df, data_input, False)
         data_formatada = pd.to_datetime(data_input, format='%d-%m-%Y').strftime('%d-%m-%Y')
         if previsao is None:
-            st.write(f"A data {data_formatada} é um final de semana ou feriado. Não há previsões disponíveis para esta data.")
+            st.markdown(f"##### A data {data_formatada} é um final de semana ou feriado. Não há previsões disponíveis para esta data.")
         else:
-            st.write(f"Valor previsto para {data_formatada}: {previsao:.2f}")
+            st.markdown(f"##### Valor previsto para {data_formatada}: {previsao:.2f}")
     else:
-        st.write("Data inválida. Por favor, insira a data no formato DD-MM-AAAA.")
+        st.markdown("##### Data inválida. Por favor, insira a data no formato DD-MM-AAAA.")
+
+st.divider()
 
 # Gráficos de Previsão
 st.write("### Gráfico de Previsão")
