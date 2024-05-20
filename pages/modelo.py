@@ -1,6 +1,5 @@
 from pipes import quote
 from urllib.parse import quote_plus
-
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -14,29 +13,28 @@ import warnings
 # Ignorar os FutureWarnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-
 ### SIDEBAR
 with st.sidebar:
     st.page_link("app.py", label="Análise", icon='🔍')
     st.page_link(r"pages\dashboard.py", label="Dashboard", icon='📊')
     st.page_link(r"pages\modelo.py", label="Previsão de preço", icon='🔮')
 
-# URL do arquivo CSV no GitHub (com espaços substituídos por +)
-# base_url = 'https://raw.githubusercontent.com/Henitz/projeto2/master/'
-# file_name = 'Dados Históricos - Petróleo Brent Futuros (8).csv'
-# encoded_file_name = quote_plus(file_name)
-# csv_url = f'{base_url}{encoded_file_name}'
+# Ignorar os FutureWarnings
 
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
-# URL bruta do arquivo CSV no GitHub
+# Adicionar link para o site de origem dos dados
+st.markdown("""
+# Previsão de Preços do Petróleo Brent - 15/05/2024 a 15/05/2025
+
+[Dados Históricos - Petróleo Brent Futuros](https://www.investing.com/commodities/brent-oil-historical-data)
+""")
+
+# URL do arquivo CSV no GitHub
 csv_url = 'https://raw.githubusercontent.com/Henitz/projeto2/master/Dados%20Hist%C3%B3ricos%20-%20Petr%C3%B3leo%20Brent%20Futuros%20(8).csv'
-
 
 # Carregar dados do Brent
 df = pd.read_csv(csv_url)
-
-# Carregar dados do Brent
-# df = pd.read_csv('Dados Históricos - Petróleo Brent Futuros (8).csv')
 
 # Renomear colunas
 df = df.rename(columns={'Data': 'ds', 'Último': 'y'})
@@ -62,40 +60,49 @@ feriados_uk = pd.DataFrame({
     'upper_window': 1,
 })
 
-
 # Função para prever usando Prophet
 def prevendo(df, data, flag):
     m = Prophet(holidays=feriados_uk)
     m.fit(df)
     future = m.make_future_dataframe(periods=365)
     forecast = m.predict(future)
-
     if flag:
-        result = forecast[forecast['ds'] == data]
-        if not result.empty:
-            return result['yhat'].values[0]
-        return None
-    else:
         return m, forecast
-
-
-# Interface com Streamlit
-st.title("Previsão de Preços do Petróleo Brent - 16/05/2024 a 16/05/2025")
-
-data_selecionada = st.date_input("Selecione uma data")
-
-if st.button('Prever'):
-    data_formatada = pd.to_datetime(data_selecionada).strftime('%Y-%m-%d')
-    previsao = prevendo(df, data_formatada, True)
-
-    if previsao is None:
-        st.write(f"A data {data_formatada} não está disponível nas previsões ou é feriado/final de semana.")
     else:
-        st.write(f"Valor previsto para {data_formatada}: {previsao:.2f}")
+        data_proxima = pd.to_datetime(data, format='%d-%m-%Y')
+        if data_proxima.weekday() >= 5 or data_proxima in uk_holidays:
+            return m, None
+        data_formatada = data_proxima.strftime('%Y-%m-%d')
+        previsao = forecast.loc[forecast['ds'] == data_formatada, 'yhat'].values
+        if previsao.size == 0:
+            return m, None
+        return m, previsao[0]
+
+# Função para validar o formato da data
+def validar_data(data):
+    try:
+        datetime.strptime(data, '%d-%m-%Y')
+        return True
+    except ValueError:
+        return False
+
+# Entrada do usuário para a data
+data_input = st.text_input("Insira a data para previsão (formato DD-MM-AAAA):")
+
+if data_input:
+    if validar_data(data_input):
+        model, previsao = prevendo(df, data_input, False)
+        data_formatada = pd.to_datetime(data_input, format='%d-%m-%Y').strftime('%d-%m-%Y')
+        if previsao is None:
+            st.write(f"A data {data_formatada} é um final de semana ou feriado. Não há previsões disponíveis para esta data.")
+        else:
+            st.write(f"Valor previsto para {data_formatada}: {previsao:.2f}")
+    else:
+        st.write("Data inválida. Por favor, insira a data no formato DD-MM-AAAA.")
 
 # Gráficos de Previsão
 st.write("### Gráfico de Previsão")
-model, forecast = prevendo(df, datetime.now().strftime('%Y-%m-%d'), False)
+model, forecast = prevendo(df, datetime.now().strftime('%d-%m-%Y'), True)
 
 if forecast is not None:
     fig1 = model.plot(forecast)
